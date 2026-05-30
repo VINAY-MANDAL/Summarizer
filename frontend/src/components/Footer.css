@@ -1,0 +1,9 @@
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 20px;
+  text-align: center;
+  background: #fff;
+}
+.footer-text { font-size: 13px; color: var(--text-muted); }
+.footer-text a { color: var(--accent-1); text-decoration: none; }
+.footer-text a:hover { text-decoration: underline; }

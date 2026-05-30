@@ -1,0 +1,15 @@
+{
+  "totalSummaries": 1,
+  "apiCallCount": 1,
+  "cacheHits": 0,
+  "videoFrequency": {
+    "3KiFyEq4JFY": 1
+  },
+  "recentRequests": [
+    {
+      "videoId": "3KiFyEq4JFY",
+      "fromCache": false,
+      "timestamp": "2026-05-30T04:34:26.660Z"
+    }
+  ]
+}
