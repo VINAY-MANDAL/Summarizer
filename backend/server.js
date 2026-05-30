@@ -10,7 +10,7 @@ const pdfRoutes = require("./routes/pdf");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || "*", methods: ["GET", "POST"] }));
+app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 app.use(express.json({ limit: "2mb" }));
 
 // Rate limit: 5 requests per minute per IP
