@@ -27,14 +27,25 @@ async function fetchTranscript(videoId) {
     if (!transcriptItems || transcriptItems.length === 0) throw new Error("TRANSCRIPT_NOT_FOUND");
     return transcriptItems.map((item) => item.text).join(" ");
   } catch (err) {
-    if (err.message === "TRANSCRIPT_NOT_FOUND") throw err;
-    if (err.message?.includes("disabled") || err.message?.includes("No transcripts")) {
+    console.error("=====Transcipt error=====");
+    console.error(err);
+    console.error("Message:", err.message);
+    console.error("stack:", err.stack);
+    console.error("==============");
+
+    if (err.message === "TRANSCRIPT_NOT_FOUND") {
+      throw err;
+    }
+    if (
+      err.message?.includes("disabled") ||
+      err.message?.includes("No transcripts")
+    ) {
       throw new Error("TRANSCRIPT_DISABLED");
     }
-    console.error("Transcript error:", err.message);
     throw new Error("TRANSCRIPT_FETCH_FAILED");
-  }
+    }
 }
+
 
 function estimateTokens(text) {
   return Math.ceil(text.split(/\s+/).length / 0.75);
