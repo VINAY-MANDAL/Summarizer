@@ -1,4 +1,5 @@
 const { YoutubeTranscript } = require("youtube-transcript");
+const { fetchTranscriptWithYtDlp } = require("./ytdlp");
 
 function extractVideoId(url) {
   try {
@@ -19,18 +20,30 @@ function extractVideoId(url) {
 async function fetchTranscript(videoId) {
   try {
     let transcriptItems;
+
     try {
       transcriptItems = await YoutubeTranscript.fetchTranscript(videoId, { lang: "en" });
-    } catch {
-      transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
+    } catch (err) {
+      console.log("Primary transcript fetch failed, trying fallback without lang:", err?.message);
+      try {
+        transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
+      } catch (err2) {
+        console.log("YouTube transcript API failed, trying yt-dlp fallback:", err2?.message);
+        return await fetchTranscriptWithYtDlp(`https://www.youtube.com/watch?v=${videoId}`);
+      }
     }
-    if (!transcriptItems || transcriptItems.length === 0) throw new Error("TRANSCRIPT_NOT_FOUND");
+
+    if (!transcriptItems || transcriptItems.length === 0) {
+      console.log("No transcript items found, using yt-dlp fallback");
+      return await fetchTranscriptWithYtDlp(`https://www.youtube.com/watch?v=${videoId}`);
+    }
+
     return transcriptItems.map((item) => item.text).join(" ");
   } catch (err) {
     console.error("=====Transcipt error=====");
     console.error(err);
-    console.error("Message:", err.message);
-    console.error("stack:", err.stack);
+    console.error("Message:", err?.message);
+    console.error("stack:", err?.stack);
     console.error("==============");
 
     if (err.message === "TRANSCRIPT_NOT_FOUND") {
@@ -43,7 +56,7 @@ async function fetchTranscript(videoId) {
       throw new Error("TRANSCRIPT_DISABLED");
     }
     throw new Error("TRANSCRIPT_FETCH_FAILED");
-    }
+  }
 }
 
 

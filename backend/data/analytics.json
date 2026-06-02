@@ -1,12 +1,18 @@
 {
-  "totalSummaries": 2,
-  "apiCallCount": 2,
+  "totalSummaries": 3,
+  "apiCallCount": 3,
   "cacheHits": 0,
   "videoFrequency": {
     "3KiFyEq4JFY": 1,
-    "G2WZ6ht2kzc": 1
+    "G2WZ6ht2kzc": 1,
+    "-1L4x15kURs": 1
   },
   "recentRequests": [
+    {
+      "videoId": "-1L4x15kURs",
+      "fromCache": false,
+      "timestamp": "2026-06-02T04:21:25.775Z"
+    },
     {
       "videoId": "G2WZ6ht2kzc",
       "fromCache": false,
