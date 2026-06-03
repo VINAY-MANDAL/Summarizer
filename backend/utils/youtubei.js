@@ -1,23 +1,25 @@
-const { Innertube } = require("youtubei.js");
-
+// utils/youtubei.js
 async function fetchTranscriptWithYoutubei(videoId) {
-  const youtube = await Innertube.create();
+  const response = await fetch(
+    `https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}&text=true`,
+    {
+      headers: {
+        "x-api-key": process.env.SUPADATA_API_KEY
+      }
+    }
+  );
 
-  const info = await youtube.getInfo(videoId);
-
-  const transcriptData = await info.getTranscript();
-
-  if (!transcriptData) {
+  if (!response.ok) {
     throw new Error("TRANSCRIPT_NOT_FOUND");
   }
 
-  const transcript = transcriptData.transcript.content.body.initial_segments
-    .map(segment => segment.snippet.text)
-    .join(" ");
+  const data = await response.json();
+  
+  if (!data.content) {
+    throw new Error("TRANSCRIPT_NOT_FOUND");
+  }
 
-  return transcript;
+  return data.content;
 }
 
-module.exports = {
-  fetchTranscriptWithYoutubei,
-};
+module.exports = { fetchTranscriptWithYoutubei };
