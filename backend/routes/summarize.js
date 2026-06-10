@@ -10,7 +10,7 @@ const { recordSummary } = require("../utils/analytics");
 const inFlightRequests = new Set();
 
 router.post("/", async (req, res) => {
-  const { url } = req.body;
+  const { url, language = "english" } = req.body;
 
   if (!url || typeof url !== "string") {
     return res.status(400).json({ error: "Please provide a valid YouTube URL." });
@@ -25,8 +25,9 @@ router.post("/", async (req, res) => {
     return res.status(429).json({ error: "This video is already being summarized. Please wait." });
   }
 
-  // Check cache first
-  const cached = getCached(videoId);
+  // Cache key includes language so Hindi and English are cached separately
+  const cacheKey = `${videoId}_${language}`;
+  const cached = getCached(cacheKey);
   if (cached) {
     recordSummary(videoId, true);
     return res.json({ summary: cached.summary, videoId, cached: true });
@@ -35,7 +36,6 @@ router.post("/", async (req, res) => {
   inFlightRequests.add(videoId);
 
   try {
-    // Fetch transcript
     let transcript;
     try {
       transcript = await fetchTranscript(videoId);
@@ -48,14 +48,12 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: messages[err.message] || messages.TRANSCRIPT_FETCH_FAILED });
     }
 
-    // Estimate size for logging
     const tokenCount = estimateTokens(transcript);
-    console.log(`Video ${videoId}: ~${tokenCount} tokens`);
+    console.log(`Video ${videoId}: ~${tokenCount} tokens | Language: ${language}`);
 
-    // Single summarization call — no chunking loop
     let summary;
     try {
-      summary = await summarizeTranscript(transcript);
+      summary = await summarizeTranscript(transcript, language);
     } catch (err) {
       if (err.message === "AI_SERVICE_UNAVAILABLE") {
         return res.status(503).json({ error: "AI service is temporarily unavailable. Please try again in a moment." });
@@ -63,7 +61,7 @@ router.post("/", async (req, res) => {
       throw err;
     }
 
-    setCached(videoId, summary);
+    setCached(cacheKey, summary);
     recordSummary(videoId, false);
 
     return res.json({ summary, videoId, cached: false, tokensEstimated: tokenCount });
